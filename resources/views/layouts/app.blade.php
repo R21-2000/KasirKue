@@ -73,8 +73,8 @@
                     <i class="fa-solid fa-boxes-stacked w-6 text-center"></i>
                     <span>Daftar Stok</span>
                 </a>
-                <a href="{{ route('stok.create') }}" class="flex items-center px-4 py-2.5 rounded-lg
-                    {{ request()->routeIs('stok.create') || request()->routeIs('stok.masuk') ? 'bg-brand-orange-dark/50 font-semibold' : 'hover:bg-white/10' }}">
+                <a href="{{ route('stok.masuk') }}" class="flex items-center px-4 py-2.5 rounded-lg
+                    {{ request()->routeIs('stok.masuk') ? 'bg-brand-orange-dark/50 font-semibold' : 'hover:bg-white/10' }}">
                     <i class="fa-solid fa-dolly w-6 text-center"></i>
                     <span>Tambah Stok</span>
                 </a>

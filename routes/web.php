@@ -41,7 +41,6 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/stok', [StokController::class, 'index'])->name('stok.index');
     Route::get('/stok/masuk', [StokController::class, 'masuk'])->name('stok.masuk');
-    Route::get('/stok/tambah', [StokController::class, 'create'])->name('stok.create');
     Route::post('/stok', [StokController::class, 'store'])->name('stok.store');
     Route::put('/stok/{id}', [StokController::class, 'update'])->name('stok.update');
     Route::delete('/stok/{id}', [StokController::class, 'destroy'])->name('stok.destroy');
