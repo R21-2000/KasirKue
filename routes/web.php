@@ -39,6 +39,8 @@ Route::middleware('auth')->group(function () {
     Route::middleware(['role:admin'])->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
 
+        Route::resource('kelola-kasir', App\Http\Controllers\KelolaKasirController::class);
+        
         // Produk & Satuan
         Route::resource('produk', ProdukController::class)->except(['index', 'create', 'store']);
         Route::get('/produk', [ProdukController::class, 'index'])->name('produk.index');

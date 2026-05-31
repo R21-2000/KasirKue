@@ -43,6 +43,10 @@
                         <i class="fa-solid fa-chart-pie w-6 text-center"></i>
                         <span>Dashboard</span>
                     </a>
+                    <a href="{{ route('kelola-kasir.index') }}" 
+                    class="flex items-center px-4 py-3 rounded-md transition duration-200 {{ request()->routeIs('kelola-kasir.*') ? 'bg-brand-orange-dark/50 font-semibold' : 'hover:bg-white/10' }}">
+                        <i class="fa-solid fa-users w-6 text-lg mr-3"></i> Kelola Kasir
+                    </a>
                     <p class="px-4 pt-4 text-xs text-gray-400 uppercase tracking-wider">Laporan</p>
                     <a href="{{ route('laporan') }}" class="flex items-center px-4 py-2.5 rounded-lg
                         {{ request()->is('laporan*') ? 'bg-brand-orange-dark/50 font-semibold' : 'hover:bg-white/10' }}">
