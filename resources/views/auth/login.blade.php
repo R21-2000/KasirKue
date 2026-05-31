@@ -50,12 +50,6 @@
             <div>
                 <button type="submit" class="w-full bg-[#E37424] hover:bg-[#C55A11] text-white font-bold py-3 px-4 rounded-md transition duration-300">Login</button>
             </div>
-
-            <div class="mt-6 text-center">
-                <p class="text-sm">
-                    Belum punya akun? <a href="{{ route('register') }}" class="font-medium text-[#E37424] hover:text-[#C55A11]">Daftar di sini</a>
-                </p>
-            </div>
         </form>
     </div>
 
