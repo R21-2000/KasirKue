@@ -23,6 +23,16 @@
         body {
             font-family: 'Poppins', sans-serif;
         }
+        /* Sembunyikan scrollbar untuk Chrome, Safari dan Opera */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Sembunyikan scrollbar untuk IE, Edge dan Firefox */
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE dan Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -34,7 +44,7 @@
                 <img src="{{ asset('image/mamina.jpg') }}" alt="Logo Dapur Mamina" class="h-16 w-16 rounded-full">
             </div>
 
-            <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+            <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto no-scrollbar">
                 <p class="px-4 text-xs text-gray-400 uppercase tracking-wider">Main</p>
                 {{-- Link Dashboard --}}
                 @if(auth()->user()->role === 'admin')
