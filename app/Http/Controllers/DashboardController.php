@@ -56,10 +56,21 @@ class DashboardController extends Controller
             ->get();
 
         // Ambil stok terendah (misal top 5)
-        $stokTerendah = Stok::with('produk')
-            ->orderBy('stok', 'asc')
-            ->take(5)
-            ->get();
+        $stokTerendah = Produk::with('satuan')
+            ->addSelect([
+                'total_masuk' => \App\Models\Stok::selectRaw('COALESCE(sum(stok), 0)')
+                    ->whereColumn('produk_id', 'produks.id'),
+                'total_terjual' => \App\Models\PenjualanDetail::selectRaw('COALESCE(sum(qty), 0)')
+                    ->whereColumn('produk_id', 'produks.id')
+            ])
+            ->get()
+            ->map(function ($produk) {
+                // Hitung sisa stok nyata (stok akhir)
+                $produk->sisa_stok = $produk->total_masuk - $produk->total_terjual;
+                return $produk;
+            })
+            ->sortBy('sisa_stok') // Urutkan dari sisa stok yang paling sedikit
+            ->take(5); // Ambil 5 teratas
 
         return view('dashboard.index', [
             'totalPendapatan' => $totalPendapatan,
