@@ -7,7 +7,7 @@
     {{-- Header Konten --}}
     <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
         <h2 class="text-3xl font-bold text-gray-800">Daftar Stok</h2>
-        <a href="{{ route('stok.create') }}"
+        <a href="{{ route('stok.masuk') }}"
            class="bg-brand-orange hover:bg-brand-orange-dark text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-300 flex items-center">
             <i class="fa-solid fa-plus mr-2"></i> Tambah Stok
         </a>

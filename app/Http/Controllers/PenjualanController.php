@@ -20,10 +20,17 @@ class PenjualanController
      */
     public function kasir()
     {
-        // Ambil semua produk untuk ditampilkan di dropdown, urutkan berdasarkan nama
-        $produks = Produk::orderBy('nama_produk')->get();
+        // Ambil semua produk dan hitung stok akhir langsung melalui subquery
+        $produks = Produk::addSelect([
+            'stok_masuk' => Stok::selectRaw('COALESCE(sum(stok), 0)')
+                ->whereColumn('produk_id', 'produks.id'),
+            'stok_terjual' => PenjualanDetail::selectRaw('COALESCE(sum(qty), 0)')
+                ->whereColumn('produk_id', 'produks.id')
+        ])->orderBy('nama_produk')->get()->map(function ($produk) {
+            $produk->stok_akhir = $produk->stok_masuk - $produk->stok_terjual;
+            return $produk;
+        });
 
-        // Kirim data produks ke view kasir
         return view('kasir', compact('produks'));
     }
     /**
@@ -107,6 +114,22 @@ class PenjualanController
 
         if ($validator->fails()) {
             return redirect()->route('kasir')->withErrors($validator)->withInput();
+        }
+
+        foreach ($request->items as $item) {
+            $produk = Produk::find($item['produk_id']);
+            
+            // Hitung sisa stok untuk produk ini
+            $stokMasuk = Stok::where('produk_id', $produk->id)->sum('stok');
+            $stokTerjual = PenjualanDetail::where('produk_id', $produk->id)->sum('qty');
+            $stokTersedia = $stokMasuk - $stokTerjual;
+
+            // Tolak transaksi jika qty melampaui batas
+            if ($item['qty'] > $stokTersedia) {
+                return redirect()->route('kasir')
+                    ->withInput()
+                    ->with('error', "Transaksi Gagal! Stok '{$produk->nama_produk}' tidak cukup. (Tersedia: {$stokTersedia}, Diminta: {$item['qty']})");
+            }
         }
 
         // 2. Gunakan DB Transaction untuk memastikan semua query berhasil

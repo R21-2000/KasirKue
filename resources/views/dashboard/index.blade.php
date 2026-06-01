@@ -74,16 +74,31 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($stokTerendah as $stok)
+                    @foreach ($stokTerendah as $produk)
                         @php
+                            // Default warna teks
                             $warna = 'text-gray-700';
-                            if ($stok->stok <= 3) $warna = 'text-red-600';
-                            elseif ($stok->stok <= 5) $warna = 'text-orange-500';
-                            elseif ($stok->stok <= 10) $warna = 'text-yellow-500';
+                            
+                            // Cek berdasarkan SISA STOK yang sebenarnya
+                            if ($produk->sisa_stok <= 3) {
+                                $warna = 'text-red-600';
+                            } elseif ($produk->sisa_stok <= 5) {
+                                $warna = 'text-orange-500';
+                            } elseif ($produk->sisa_stok <= 10) {
+                                $warna = 'text-yellow-500';
+                            }
                         @endphp
-                        <tr class="bg-white border-b">
-                            <td class="px-4 py-3 font-medium">{{ $stok->produk->nama_produk ?? '-' }}</td>
-                            <td class="px-4 py-3 text-right font-bold {{ $warna }}">{{ $stok->stok }}</td>
+                        
+                        <tr class="bg-white border-b hover:bg-gray-50 transition duration-150">
+                            {{-- Kolom 1: Menampilkan Nama Produk --}}
+                            <td class="px-4 py-3 font-medium text-gray-800">
+                                {{ $produk->nama_produk }}
+                            </td>
+                            
+                            {{-- Kolom 2: Menampilkan Angka Sisa Stok & Warna --}}
+                            <td class="px-4 py-3 text-right font-bold {{ $warna }}">
+                                {{ $produk->sisa_stok }} {{ $produk->satuan->nama_satuan ?? '' }}
+                            </td>
                         </tr>
                     @endforeach
                 </tbody>

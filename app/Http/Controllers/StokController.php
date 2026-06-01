@@ -70,25 +70,17 @@ class StokController
 {
     // Ambil daftar stok + relasi produk
     $stoks = Stok::with('produk')->get();
+    $produks = Produk::with('satuan')->get();
 
     // Kalau ada kolom opname yang mau ditampilkan/hitung, misalnya log terakhir opname:
     $lastOpname = null; // Misalnya log atau timestamp opname
 
-    return view('stok-index', [
+    return view('stok.masuk', [
         'stoks' => $stoks,
+        'produks' => $produks,
         'lastOpname' => $lastOpname
     ]);
 }
-
-
-    /**
-     * Tampilkan form tambah stok baru.
-     */
-    public function create()
-    {
-        $produks = Produk::with('satuan')->get();
-        return view('stok.tambah', compact('produks'));
-    }
 
     /**
      * Simpan stok baru atau update jika sudah ada.

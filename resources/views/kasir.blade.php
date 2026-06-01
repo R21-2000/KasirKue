@@ -50,11 +50,15 @@
                         <select id="select-produk" class="w-full p-2 border border-gray-300 rounded-md">
                             <option value="">-- Pilih Produk --</option>
                             @foreach ($produks as $produk)
-                                <option value="{{ $produk->id }}" 
-                                        data-nama="{{ $produk->nama_produk }}" 
-                                        data-harga="{{ $produk->harga_satuan }}">
-                                    {{ $produk->nama_produk }}
-                                </option>
+                                {{-- Sembunyikan produk jika stoknya sudah habis --}}
+                                @if($produk->stok_akhir > 0)
+                                    <option value="{{ $produk->id }}" 
+                                            data-nama="{{ $produk->nama_produk }}" 
+                                            data-harga="{{ $produk->harga_satuan }}"
+                                            data-stok="{{ $produk->stok_akhir }}">
+                                        {{ $produk->nama_produk }} (Sisa: {{ $produk->stok_akhir }})
+                                    </option>
+                                @endif
                             @endforeach
                         </select>
                     </div>
@@ -138,7 +142,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const produk = {
             id: selectedOption.value,
             nama_produk: selectedOption.dataset.nama,
-            harga_satuan: selectedOption.dataset.harga
+            harga_satuan: selectedOption.dataset.harga,
+            stok_maks: parseInt(selectedOption.dataset.stok) // Ambil nilai stok
         };
         
         addProductToCart(produk);
@@ -152,17 +157,23 @@ document.addEventListener('DOMContentLoaded', function () {
     const addProductToCart = (produk) => {
         const produkId = produk.id;
         if (cart[produkId]) {
-            cart[produkId].qty++;
+            // Cek sebelum ditambah
+            if (cart[produkId].qty < cart[produkId].stok_maks) {
+                cart[produkId].qty++;
+            } else {
+                alert(`Maksimal stok untuk ${produk.nama_produk} adalah ${produk.stok_maks}`);
+            }
         } else {
             cart[produkId] = {
                 id: produkId,
                 nama: produk.nama_produk,
                 harga: parseFloat(produk.harga_satuan),
-                qty: 1
+                qty: 1,
+                stok_maks: produk.stok_maks // Simpan batas stok di keranjang
             };
         }
         searchInput.value = '';
-        searchResults.classList.add('hidden');
+        if(searchResults) searchResults.classList.add('hidden');
         renderCart();
     };
 
@@ -209,11 +220,18 @@ document.addEventListener('DOMContentLoaded', function () {
     cartItems.addEventListener('change', (e) => {
         if(e.target.tagName === 'INPUT' && e.target.type === 'number') {
             const id = e.target.dataset.id;
-            const newQty = parseInt(e.target.value, 10);
+            let newQty = parseInt(e.target.value, 10);
+            const batasStok = cart[id].stok_maks;
+            
+            if (newQty > batasStok) {
+                alert(`Stok tidak cukup! Maksimal ${batasStok}`);
+                newQty = batasStok; // Kembalikan angka ke batas maksimal
+                e.target.value = batasStok; 
+            }
+
             if (newQty > 0) {
                 cart[id].qty = newQty;
             } else {
-                // Jika qty 0 atau kurang, hapus item
                 delete cart[id];
             }
             renderCart();
