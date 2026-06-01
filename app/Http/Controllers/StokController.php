@@ -50,17 +50,26 @@ class StokController
         return $item;
     });
 
-    // Filter
-    if ($request->filled('min_stok') && $request->filled('max_stok')) {
-        $laporanStok = $laporanStok->whereBetween('stok_akhir', [$request->min_stok, $request->max_stok]);
-    }
+    // 1. Filter Min Stok (Bisa jalan meskipun Max kosong)
+        if ($request->filled('min_stok')) {
+            $laporanStok = $laporanStok->where('stok_akhir', '>=', $request->min_stok);
+        }
 
-    if ($request->filled('search')) {
-        $searchTerm = strtolower($request->search);
-        $laporanStok = $laporanStok->filter(
-            fn($item) => str_contains(strtolower($item->nama_produk), $searchTerm) || str_contains(strtolower($item->sku), $searchTerm)
-        );
-    }
+        // 2. Filter Max Stok (Bisa jalan meskipun Min kosong)
+        if ($request->filled('max_stok')) {
+            $laporanStok = $laporanStok->where('stok_akhir', '<=', $request->max_stok);
+        }
+
+        // 3. Filter Search (Aman dari data NULL)
+        if ($request->filled('search')) {
+            $searchTerm = strtolower($request->search);
+            $laporanStok = $laporanStok->filter(function ($item) use ($searchTerm) {
+                $namaProduk = strtolower($item->nama_produk ?? '');
+                $sku = strtolower($item->sku ?? '');
+                
+                return str_contains($namaProduk, $searchTerm) || str_contains($sku, $searchTerm);
+            });
+        }
     return view('OpnameStok.daftar_stok', compact('laporanStok', 'startDate', 'endDate'));
 }
     /**
