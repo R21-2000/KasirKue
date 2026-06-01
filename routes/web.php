@@ -37,7 +37,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware(['role:admin'])->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
 
-        Route::resource('kelola-kasir', App\Http\Controllers\KelolaKasirController::class);
+        Route::resource('kelola-kasir', App\Http\Controllers\KelolaKasirController::class) ->except(['show', 'edit', 'update']); // hal ini dilakukan karena kita tidak ada fitur edit, jika kedepan ada fitur edit, tambahkan routenya disini
         
         // Produk & Satuan
         Route::get('/produk', [ProdukController::class, 'index'])->name('produk.index');
