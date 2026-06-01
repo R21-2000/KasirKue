@@ -11,40 +11,6 @@ use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
 {
-    // ... (method register, login, logout yang sudah ada) ...
-
-    // Menampilkan halaman registrasi
-    public function showRegistrationForm()
-    {
-        return view('auth.register');
-    }
-
-    // Memproses registrasi
-    public function register(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
-
-        if ($validator->fails()) {
-            return redirect('register')
-                        ->withErrors($validator)
-                        ->withInput();
-        }
-
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
-
-        Auth::login($user);
-
-        return redirect('/dashboard');
-    }
-
     // Menampilkan halaman login
     public function showLoginForm()
     {

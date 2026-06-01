@@ -23,6 +23,16 @@
         body {
             font-family: 'Poppins', sans-serif;
         }
+        /* Sembunyikan scrollbar untuk Chrome, Safari dan Opera */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Sembunyikan scrollbar untuk IE, Edge dan Firefox */
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE dan Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -34,54 +44,59 @@
                 <img src="{{ asset('image/mamina.jpg') }}" alt="Logo Dapur Mamina" class="h-16 w-16 rounded-full">
             </div>
 
-            <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+            <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto no-scrollbar">
                 <p class="px-4 text-xs text-gray-400 uppercase tracking-wider">Main</p>
                 {{-- Link Dashboard --}}
-                <a href="{{ url('/') }}" class="flex items-center px-4 py-2.5 rounded-lg font-semibold
-                    {{ request()->is('/') ? 'bg-brand-orange-dark/50' : 'hover:bg-white/10' }}">
-                    <i class="fa-solid fa-chart-pie w-6 text-center"></i>
-                    <span>Dashboard</span>
-                </a>
+                @if(auth()->user()->role === 'admin')
+                    <a href="{{ url('/') }}" class="flex items-center px-4 py-2.5 rounded-lg font-semibold
+                        {{ request()->is('/') ? 'bg-brand-orange-dark/50' : 'hover:bg-white/10' }}">
+                        <i class="fa-solid fa-chart-pie w-6 text-center"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="{{ route('kelola-kasir.index') }}" 
+                    class="flex items-center px-4 py-3 rounded-md transition duration-200 {{ request()->routeIs('kelola-kasir.*') ? 'bg-brand-orange-dark/50 font-semibold' : 'hover:bg-white/10' }}">
+                        <i class="fa-solid fa-users w-6 text-lg mr-3"></i> Kelola Kasir
+                    </a>
+                    <p class="px-4 pt-4 text-xs text-gray-400 uppercase tracking-wider">Laporan</p>
+                    <a href="{{ route('laporan') }}" class="flex items-center px-4 py-2.5 rounded-lg
+                        {{ request()->is('laporan*') ? 'bg-brand-orange-dark/50 font-semibold' : 'hover:bg-white/10' }}">
+                        <i class="fa-solid fa-file-alt w-6 text-center"></i>
+                        <span>Laporan</span>
+                    </a>
+                    <p class="px-4 pt-4 text-xs text-gray-400 uppercase tracking-wider">Master Data</p>
+                    <a href="{{ route('produk.index') }}" class="flex items-center px-4 py-2.5 rounded-lg
+                        {{ request()->is('produk*') || request()->is('tambah-produk') ? 'bg-brand-orange-dark/50 font-semibold' : 'hover:bg-white/10' }}">
+                        <i class="fa-solid fa-tags w-6 text-center"></i>
+                        <span>Produk</span>
+                    </a>
+                    <a href="{{ route('satuan.index') }}" class="flex items-center px-4 py-2.5 rounded-lg
+                        {{ request()->routeIs('satuan.*') ? 'bg-brand-orange-dark/50 font-semibold' : 'hover:bg-white/10' }}">
+                        <i class="fa-solid fa-box-open w-6 text-center"></i>
+                        <span>Satuan</span>
+                    </a>
+                    <p class="px-4 pt-4 text-xs text-gray-400 uppercase tracking-wider">Inventori</p>
+                    <a href="{{ url('/daftar-stok') }}" class="flex items-center px-4 py-2.5 rounded-lg
+                        {{ request()->is('daftar-stok') ? 'bg-brand-orange-dark/50 font-semibold' : 'hover:bg-white/10' }}">
+                        <i class="fa-solid fa-boxes-stacked w-6 text-center"></i>
+                        <span>Daftar Stok</span>
+                    </a>
+                    <a href="{{ route('stok.masuk') }}" class="flex items-center px-4 py-2.5 rounded-lg
+                        {{ request()->routeIs('stok.masuk') ? 'bg-brand-orange-dark/50 font-semibold' : 'hover:bg-white/10' }}">
+                        <i class="fa-solid fa-dolly w-6 text-center"></i>
+                        <span>Tambah Stok</span>
+                    </a>
+                    <a href="{{ url('/opname-stok') }}" class="flex items-center px-4 py-2.5 rounded-lg
+                        {{ request()->is('opname-stok') ? 'bg-brand-orange-dark/50 font-semibold' : 'hover:bg-white/10' }}">
+                        <i class="fa-solid fa-tasks w-6 text-center"></i>
+                        <span>Opname Stok</span>
+                    </a>
+                @endif
+
                 {{-- Link Kasir --}}
                 <a href="{{ url('/kasir') }}" class="flex items-center px-4 py-2.5 rounded-lg
                     {{ request()->is('kasir') ? 'bg-brand-orange-dark/50 font-semibold' : 'hover:bg-white/10' }}">
                     <i class="fa-solid fa-cash-register w-6 text-center"></i>
                     <span>Kasir</span>
-                </a>
-
-                <p class="px-4 pt-4 text-xs text-gray-400 uppercase tracking-wider">Laporan</p>
-                <a href="{{ route('laporan') }}" class="flex items-center px-4 py-2.5 rounded-lg
-                    {{ request()->is('laporan*') ? 'bg-brand-orange-dark/50 font-semibold' : 'hover:bg-white/10' }}">
-                    <i class="fa-solid fa-file-alt w-6 text-center"></i>
-                    <span>Laporan</span>
-                </a>
-
-                <p class="px-4 pt-4 text-xs text-gray-400 uppercase tracking-wider">Master Data</p>
-                 <a href="{{ route('produk.index') }}" class="flex items-center px-4 py-2.5 rounded-lg
-                    {{ request()->is('produk*') || request()->is('tambah-produk') ? 'bg-brand-orange-dark/50 font-semibold' : 'hover:bg-white/10' }}">
-                    <i class="fa-solid fa-tags w-6 text-center"></i>
-                    <span>Produk</span>
-                </a>
-                <a href="{{ route('satuan.index') }}" class="flex items-center px-4 py-2.5 rounded-lg
-                    {{ request()->routeIs('satuan.*') ? 'bg-brand-orange-dark/50 font-semibold' : 'hover:bg-white/10' }}">
-                    <i class="fa-solid fa-box-open w-6 text-center"></i>
-                    <span>Satuan</span>
-                </a>
-                <p class="px-4 pt-4 text-xs text-gray-400 uppercase tracking-wider">Inventori</p>
-                <a href="{{ url('/daftar-stok') }}" class="flex items-center px-4 py-2.5 rounded-lg
-                    {{ request()->is('daftar-stok') ? 'bg-brand-orange-dark/50 font-semibold' : 'hover:bg-white/10' }}">
-                    <i class="fa-solid fa-boxes-stacked w-6 text-center"></i>
-                    <span>Daftar Stok</span>
-                </a>
-                <a href="{{ route('stok.create') }}" class="flex items-center px-4 py-2.5 rounded-lg
-                    {{ request()->routeIs('stok.create') || request()->routeIs('stok.masuk') ? 'bg-brand-orange-dark/50 font-semibold' : 'hover:bg-white/10' }}">
-                    <i class="fa-solid fa-dolly w-6 text-center"></i>
-                    <span>Tambah Stok</span>
-                </a>
-                 <a href="{{ url('/opname-stok') }}" class="flex items-center px-4 py-2.5 rounded-lg
-                    {{ request()->is('opname-stok') ? 'bg-brand-orange-dark/50 font-semibold' : 'hover:bg-white/10' }}">
-                    <i class="fa-solid fa-tasks w-6 text-center"></i>
-                    <span>Opname Stok</span>
                 </a>
             </nav>
 
