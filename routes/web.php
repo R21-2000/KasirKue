@@ -40,10 +40,11 @@ Route::middleware('auth')->group(function () {
         Route::resource('kelola-kasir', App\Http\Controllers\KelolaKasirController::class);
         
         // Produk & Satuan
-        Route::resource('produk', ProdukController::class)->except(['index', 'create', 'store']);
         Route::get('/produk', [ProdukController::class, 'index'])->name('produk.index');
         Route::get('/produk/tambah', [ProdukController::class, 'create'])->name('produk.create');
         Route::post('/produk', [ProdukController::class, 'store'])->name('produk.store');
+        
+        Route::resource('produk', ProdukController::class)->except(['index', 'create', 'store']);
         Route::resource('satuan', SatuanController::class);
 
         // Stok
