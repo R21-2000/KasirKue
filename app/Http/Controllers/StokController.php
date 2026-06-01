@@ -137,7 +137,9 @@ class StokController
      */
     public function update(Request $request, Stok $stok)
     {
-         $stok->update($request->only(['jumlah']));
+        $stok->update([
+            'stok' => $request->jumlah
+        ]); //ini fungsi yang bisa dihapus
         return redirect()->route('stok.list');
     }
 
