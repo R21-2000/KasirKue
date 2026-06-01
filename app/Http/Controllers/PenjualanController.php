@@ -140,7 +140,7 @@ class PenjualanController
             $penjualan = Penjualan::create([
                 // Buat nomor transaksi unik
                 'no_transaksi' => 'TRX-' . Carbon::now()->format('YmdHis'),
-                'pengguna_id' => 1,
+                'pengguna_id' => auth()->id(),
                 'nama_pelanggan' => $request->nama_pelanggan ?? 'Walk-in',
                 'tanggal_penjualan' => Carbon::now()->toDateString(),
                 'waktu_bayar' => Carbon::now(),
