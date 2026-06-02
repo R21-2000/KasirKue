@@ -12,75 +12,76 @@ use Carbon\Carbon;
 /**
  * Controller untuk manajemen stok.
  */
-class StokController
+class StokController extends Controller
 {
     public function daftarStok(Request $request)
-{
-    $startDate = $request->input('start_date', '2025-06-01');
-    $endDate = $request->input('end_date', now()->toDateString());
-    $endDateInclusive = Carbon::parse($endDate)->endOfDay()->toDateTimeString();
+    {
+        $startDate = $request->input('start_date', '2025-06-01');
+        $endDate = $request->input('end_date', now()->toDateString());
+        $endDateInclusive = Carbon::parse($endDate)->endOfDay()->toDateTimeString();
 
-    $query = Produk::query();
+        $query = Produk::query();
 
-    $query->addSelect([
-        'total_masuk_sebelum' => Stok::query()
-            ->selectRaw('COALESCE(sum(stok), 0)')
-            ->whereColumn('produk_id', 'produks.id')
-            ->where('created_at', '<', $startDate),
+        $query->addSelect([
+            'total_masuk_sebelum' => Stok::query()
+                ->selectRaw('COALESCE(sum(stok), 0)')
+                ->whereColumn('produk_id', 'produks.id')
+                ->where('created_at', '<', $startDate),
 
-        'total_terjual_sebelum' => PenjualanDetail::query()
-            ->selectRaw('COALESCE(sum(qty), 0)')
-            ->whereColumn('produk_id', 'produks.id')
-            ->whereHas('penjualan', fn($q) => $q->where('tanggal_penjualan', '<', $startDate)),
+            'total_terjual_sebelum' => PenjualanDetail::query()
+                ->selectRaw('COALESCE(sum(qty), 0)')
+                ->whereColumn('produk_id', 'produks.id')
+                ->whereHas('penjualan', fn($q) => $q->where('tanggal_penjualan', '<', $startDate)),
 
-        'stok_masuk_periode' => Stok::query()
-            ->selectRaw('COALESCE(sum(stok), 0)')
-            ->whereColumn('produk_id', 'produks.id')
-            ->whereBetween('created_at', [$startDate, $endDateInclusive]),
+            'stok_masuk_periode' => Stok::query()
+                ->selectRaw('COALESCE(sum(stok), 0)')
+                ->whereColumn('produk_id', 'produks.id')
+                ->whereBetween('created_at', [$startDate, $endDateInclusive]),
 
-        'stok_terjual_periode' => PenjualanDetail::query()
-            ->selectRaw('COALESCE(sum(qty), 0)')
-            ->whereColumn('produk_id', 'produks.id')
-            ->whereHas('penjualan', fn($q) => $q->whereBetween('tanggal_penjualan', [$startDate, $endDate])),
- ]);
+            'stok_terjual_periode' => PenjualanDetail::query()
+                ->selectRaw('COALESCE(sum(qty), 0)')
+                ->whereColumn('produk_id', 'produks.id')
+                ->whereHas('penjualan', fn($q) => $q->whereBetween('tanggal_penjualan', [$startDate, $endDate])),
+        ]);
 
-    $laporanStok = $query->with('satuan')->get()->map(function ($item) {
-        $item->stok_awal = $item->total_masuk_sebelum - $item->total_terjual_sebelum;
-        $item->stok_akhir = $item->stok_awal + $item->stok_masuk_periode - $item->stok_terjual_periode;
-        return $item;
-    });
+        $laporanStok = $query->with('satuan')->get()->map(function ($item) {
+            $item->stok_awal = $item->total_masuk_sebelum - $item->total_terjual_sebelum;
+            $item->stok_akhir = $item->stok_awal + $item->stok_masuk_periode - $item->stok_terjual_periode;
+            return $item;
+        });
 
-    // Filter
-    if ($request->filled('min_stok') && $request->filled('max_stok')) {
-        $laporanStok = $laporanStok->whereBetween('stok_akhir', [$request->min_stok, $request->max_stok]);
+        // Filter
+        if ($request->filled('min_stok') && $request->filled('max_stok')) {
+            $laporanStok = $laporanStok->whereBetween('stok_akhir', [$request->min_stok, $request->max_stok]);
+        }
+
+        if ($request->filled('search')) {
+            $searchTerm = strtolower($request->search);
+            $laporanStok = $laporanStok->filter(
+                fn($item) => str_contains(strtolower($item->nama_produk), $searchTerm) || str_contains(strtolower($item->sku), $searchTerm)
+            );
+        }
+        return view('OpnameStok.daftar_stok', compact('laporanStok', 'startDate', 'endDate'));
     }
 
-    if ($request->filled('search')) {
-        $searchTerm = strtolower($request->search);
-        $laporanStok = $laporanStok->filter(
-            fn($item) => str_contains(strtolower($item->nama_produk), $searchTerm) || str_contains(strtolower($item->sku), $searchTerm)
-        );
-    }
-    return view('OpnameStok.daftar_stok', compact('laporanStok', 'startDate', 'endDate'));
-}
     /**
      * Tampilkan semua stok masuk.
      */
     public function index()
-{
-    // Ambil daftar stok + relasi produk
-    $stoks = Stok::with('produk')->get();
-    $produks = Produk::with('satuan')->get();
+    {
+        // Ambil daftar stok + relasi produk
+        $stoks = Stok::with('produk')->get();
+        $produks = Produk::with('satuan')->get();
 
-    // Kalau ada kolom opname yang mau ditampilkan/hitung, misalnya log terakhir opname:
-    $lastOpname = null; // Misalnya log atau timestamp opname
+        // Kalau ada kolom opname yang mau ditampilkan/hitung, misalnya log terakhir opname:
+        $lastOpname = null; // Misalnya log atau timestamp opname
 
-    return view('stok.masuk', [
-        'stoks' => $stoks,
-        'produks' => $produks,
-        'lastOpname' => $lastOpname
-    ]);
-}
+        return view('stok.masuk', [
+            'stoks' => $stoks,
+            'produks' => $produks,
+            'lastOpname' => $lastOpname
+        ]);
+    }
 
     /**
      * Simpan stok baru atau update jika sudah ada.
@@ -103,6 +104,7 @@ class StokController
         // 3. Alihkan kembali ke halaman daftar stok dengan pesan sukses
         return redirect()->route('stok.daftar')->with('success', 'Stok berhasil ditambahkan!');
     }
+
     /**
      * Tampilkan daftar stok (bisa filter min & max jumlah).
      */
@@ -149,6 +151,7 @@ class StokController
          $stok->delete();
         return back();
     }
+
     /**
      * Shortcut ke index() untuk stok masuk.
      */
@@ -170,22 +173,35 @@ class StokController
 
         try {
             DB::transaction(function () use ($request) {
-                foreach ($request->stok as $produk_id => $new_stok_value) {
+                foreach ($request->stok as $produk_id => $stok_fisik_baru) {
                     // Hanya proses jika nilainya diisi
-                    if (!is_null($new_stok_value)) {
-                        // 1. Hapus semua catatan stok masuk sebelumnya untuk produk ini
-                        Stok::where('produk_id', $produk_id)->delete();
+                    if (!is_null($stok_fisik_baru)) {
 
-                        // 2. Buat satu catatan stok baru yang merepresentasikan hasil opname
-                        Stok::create([
-                            'produk_id' => $produk_id,
-                            'stok' => $new_stok_value,
-                        ]);
+                        // 1. Hitung total stok yang pernah masuk
+                        $total_masuk = Stok::where('produk_id', $produk_id)->sum('stok');
+
+                        // 2. Hitung total produk yang sudah terjual
+                        $total_terjual = PenjualanDetail::where('produk_id', $produk_id)->sum('qty');
+
+                        // 3. Hitung stok di sistem saat ini (yang seharusnya)
+                        $stok_sistem = $total_masuk - $total_terjual;
+
+                        // 4. Cari SELISIH antara inputan fisik dengan stok sistem
+                        // Contoh: Fisik 30, Sistem 43. Selisih = 30 - 43 = -13.
+                        $selisih = $stok_fisik_baru - $stok_sistem;
+
+                        // 5. Jika ada selisih, buat record "Penyesuaian" tanpa menghapus riwayat lama!
+                        if ($selisih != 0) {
+                            Stok::create([
+                                'produk_id' => $produk_id,
+                                'stok' => $selisih, // Nilai ini bisa minus kalau barang hilang/basi
+                            ]);
+                        }
                     }
                 }
             });
 
-            return redirect()->route('stok.daftar')->with('success', 'Stok opname berhasil disimpan!');
+            return redirect()->route('stok.daftar')->with('success', 'Stok opname berhasil disimpan dan disesuaikan!');
 
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan data opname.');
