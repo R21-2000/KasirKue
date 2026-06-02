@@ -1,20 +1,21 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\StokController;
 use App\Http\Controllers\SatuanController;
 use App\Http\Controllers\PenjualanController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\KelolaKasirController;
 
 // Rute Autentikasi
 Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('login', [AuthController::class, 'login']);
 
-
 Route::middleware('auth')->group(function () {
-    // ... rute profil & logout ...
+    // Profil & Logout
     Route::post('logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/profile', [AuthController::class, 'showProfileForm'])->name('profile.edit');
     Route::put('/profile', [AuthController::class, 'updateProfile'])->name('profile.update');
@@ -23,8 +24,9 @@ Route::middleware('auth')->group(function () {
     // === RUTE YANG BISA DIAKSES KASIR & ADMIN ===
     Route::get('/', function () {
         // Jika kasir login, arahkan langsung ke halaman kasir. Jika admin, ke dashboard.
-        return auth()->user()->role === 'admin' 
-            ? redirect()->route('dashboard.index') 
+        // Menggunakan Auth::user() agar Intelephense tidak memberikan peringatan error merah
+        return Auth::user()->role === 'admin'
+            ? redirect()->route('dashboard.index')
             : redirect()->route('kasir');
     });
 
@@ -32,18 +34,21 @@ Route::middleware('auth')->group(function () {
     Route::post('/kasir', [PenjualanController::class, 'store'])->name('kasir.store');
     Route::get('/api/produk', [ProdukController::class, 'searchApi'])->name('produk.searchApi');
 
-
     // === RUTE KHUSUS ADMIN ===
     Route::middleware(['role:admin'])->group(function () {
+        // Dashboard
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
 
-        Route::resource('kelola-kasir', App\Http\Controllers\KelolaKasirController::class);
-        
-        // Produk & Satuan
-        Route::resource('produk', ProdukController::class)->except(['index', 'create', 'store']);
+        // Kelola Kasir
+        Route::resource('kelola-kasir', KelolaKasirController::class);
+
+        // Produk (PENTING: Urutan rute custom harus di atas Route::resource)
         Route::get('/produk', [ProdukController::class, 'index'])->name('produk.index');
         Route::get('/produk/tambah', [ProdukController::class, 'create'])->name('produk.create');
         Route::post('/produk', [ProdukController::class, 'store'])->name('produk.store');
+        Route::resource('produk', ProdukController::class)->except(['index', 'create', 'store']);
+
+        // Satuan
         Route::resource('satuan', SatuanController::class);
 
         // Stok
