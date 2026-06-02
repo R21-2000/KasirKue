@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
             SatuanSeeder::class,
             ProdukSeeder::class,
             PenjualanSeeder::class,
+            UserSeeder::class,
         ]);
     }
 }
