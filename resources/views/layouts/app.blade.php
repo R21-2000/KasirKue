@@ -37,7 +37,7 @@
 </head>
 <body class="bg-gray-100 overflow-hidden"> <!-- Tambah overflow-hidden biar nggak scroll double -->
 
-    <div class="flex h-screen relative">
+    <div class="flex h-[100dvh] relative">
 
         {{-- [BARU] Overlay Gelap untuk Mobile saat Sidebar Terbuka --}}
         <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden transition-opacity duration-300 md:hidden"></div>
@@ -135,7 +135,7 @@
         </aside>
 
         {{-- Main Content --}}
-        <div class="flex-1 flex flex-col w-full h-screen overflow-hidden">
+        <div class="flex-1 flex flex-col w-full h-full overflow-hidden">
             {{-- [UBAHAN] Header disesuaikan. Tombol Hamburger di kiri, Judul di kanan --}}
             <header class="h-20 bg-brand-orange flex items-center justify-between md:justify-end px-4 md:px-8 shrink-0">
                  {{-- Tombol Hamburger Khusus HP --}}
@@ -148,7 +148,7 @@
                  </div>
             </header>
 
-            <main class="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto">
+            <main class="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto pb-24">
                 @yield('content')
             </main>
         </div>
